@@ -1,4 +1,3 @@
-
 name: Build PixeledOS for Galaxy S8
 
 on:
@@ -7,7 +6,6 @@ on:
 env:
   DEVICE: dreamlte
   BRANCH: lineage-21.0
-  OUT_DIR: src/out
 
 jobs:
   build:
@@ -25,7 +23,7 @@ jobs:
     - name: Setup Build Environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.1-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev python3
+        sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev python3 libsdl1.2-dev
         
     - name: Initialize Repository
       run: |
@@ -34,6 +32,20 @@ jobs:
         mkdir -p src
         cd src
         repo init -u https://github.com -b ${{ env.BRANCH }} --git-lfs --depth=1
+
+    - name: Download Device Sources
+      run: |
+        cd src
+        mkdir -p .repo/local_manifests
+        echo '<?xml version="1.0" encoding="UTF-8"?>
+        <manifest>
+          <project name="8890q/android_device_samsung_dreamlte" path="device/samsung/dreamlte" remote="github" revision="lineage-21" />
+          <project name="8890q/android_kernel_samsung_universal8895" path="kernel/samsung/universal8895" remote="github" revision="lineage-21" />
+          <project name="8890q/android_vendor_samsung_dreamlte" path="vendor/samsung/dreamlte" remote="github" revision="lineage-21" />
+          <project name="8890q/android_device_samsung_universal8895-common" path="device/samsung/universal8895-common" remote="github" revision="lineage-21" />
+          <project name="8890q/android_vendor_samsung_universal8895-common" path="vendor/samsung/universal8895-common" remote="github" revision="lineage-21" />
+        </manifest>' > .repo/local_manifests/roomservice.xml
+        repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
     - name: Run Build Script
       run: |
