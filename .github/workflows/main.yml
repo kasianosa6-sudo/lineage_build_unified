@@ -1,0 +1,22 @@
+name: Build PixeledOS (Galaxy S8)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Build Environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.1-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+
+    - name: Run Build Script
+      run: |
+        bash apply_patches.sh
+        echo "Rozpoczynam automatyczne budowanie PixeledOS dla dreamlte..."
+        # Tutaj serwery chmurowe odpalają skrypt z Twojego forka
