@@ -1,22 +1,41 @@
-name: Build PixeledOS (Galaxy S8)
+
+name: Build PixeledOS for Galaxy S8
 
 on:
   workflow_dispatch:
 
+env:
+  DEVICE: dreamlte
+  BRANCH: lineage-21.0
+  OUT_DIR: src/out
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
+    - name: Free Disk Space
+      run: |
+        sudo rm -rf /usr/share/dotnet
+        sudo rm -rf /usr/local/lib/android
+        sudo rm -rf /opt/ghc
+
     - name: Checkout Repository
       uses: actions/checkout@v4
 
     - name: Setup Build Environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.1-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+        sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf imagemagick lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.1-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev python3
+        
+    - name: Initialize Repository
+      run: |
+        git config --global user.name "PixeledOS Builder"
+        git config --global user.email "builder@pixeledos.local"
+        mkdir -p src
+        cd src
+        repo init -u https://github.com -b ${{ env.BRANCH }} --git-lfs --depth=1
 
     - name: Run Build Script
       run: |
-        bash apply_patches.sh
-        echo "Rozpoczynam automatyczne budowanie PixeledOS dla dreamlte..."
-        # Tutaj serwery chmurowe odpalają skrypt z Twojego forka
+        chmod +x apply_patches.sh
+        ./apply_patches.sh ${{ env.DEVICE }}
